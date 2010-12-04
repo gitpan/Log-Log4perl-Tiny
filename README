@@ -1,0 +1,17 @@
+
+
+This archive contains the distribution Log-Log4perl-Tiny,
+version 0.1.0_1:
+
+  mimic Log::Log4perl in one single module
+
+Copyright (C) 2010 by Flavio Poletti <polettix@cpan.org>.
+
+This module is free software.  You can redistribute it and/or
+modify it under the terms of the Artistic License 2.0.
+
+This program is distributed in the hope that it will be useful,
+but without any warranty; without even the implied warranty of
+merchantability or fitness for a particular purpose.
+
+
