@@ -12,4 +12,6 @@ meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
 name: Log-Log4perl-Tiny
-version: 0.1.0_2
+requires:
+  perl: 5.008_000
+version: 0.1.0_3

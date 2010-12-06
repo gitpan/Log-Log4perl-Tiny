@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-
+BEGIN { require 5.008_000; }
 
 use ExtUtils::MakeMaker 6.31;
 
@@ -20,7 +20,7 @@ my %WriteMakefileArgs = (
   'LICENSE' => 'artistic_2',
   'NAME' => 'Log::Log4perl::Tiny',
   'PREREQ_PM' => {},
-  'VERSION' => '0.1.0_2',
+  'VERSION' => '0.1.0_3',
   'test' => {
     'TESTS' => 't/*.t'
   }
