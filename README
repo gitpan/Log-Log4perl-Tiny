@@ -1,17 +1,501 @@
+NAME
+    Log::Log4perl::Tiny - mimic Log::Log4perl in one single module
 
+VERSION
+    version 1.0.1_01
 
-This archive contains the distribution Log-Log4perl-Tiny,
-version 1.0.0:
+SYNOPSIS
+       use Log::Log4perl::Tiny qw( :easy );
+       Log::Log4perl->easy_init({
+          file   => '>>/var/log/something.log',
+          layout => '[%d] [%-5P:%-5p] %m%n',
+          level  => $INFO,
+       });
 
-  mimic Log::Log4perl in one single module
+       WARN 'something weird happened';
+       INFO 'just doing it';
+       DEBUG 'this does not get printed at $INFO level';
 
-Copyright (C) 2010 by Flavio Poletti <polettix@cpan.org>.
+       # LOGLEVEL isn't in Log::Log4perl, but might come handy
+       LOGLEVEL($DEBUG);   # enable debugging for small section
+       # otherwise, "get_logger()->level($DEBUG)", see below
 
-This module is free software.  You can redistribute it and/or
-modify it under the terms of the Artistic License 2.0.
+       DEBUG 'now this gets printed';
+       LOGLEVEL($INFO);    # disable debugging again
+       DEBUG 'skipped, again';
+       DEBUG 'complex evaluation value:', sub { 
+          # evaluation skipped if log level filters DEBUG out
+       };
 
-This program is distributed in the hope that it will be useful,
-but without any warranty; without even the implied warranty of
-merchantability or fitness for a particular purpose.
+       # Object-oriented interface is available as well
+       my $logger = get_logger();
+       $logger->level($DEBUG);   # enable debugging for small section
+       $logger->debug('whatever you want');
+       $logger->level($INFO);    # disable debugging again
 
+       # All stealth loggers are available
+       LOGCONFESS 'I cannot accept this, for a whole stack of reasons!';
+
+       # Want to change layout?
+       $logger->layout('[%d %p] %m%n');
+       # or, equivalently
+       $logger->format('[%d %p] %m%n');
+
+       # Want to send the output somewhere else?
+       use IO::Handle;
+       open my $fh, '>>', '/path/to/new.log';
+       $fh->autoflush();
+       $logger->fh($fh);
+
+       # Want to handle the output message by yourself?
+       my @queue; # all log messages will be put here
+       $logger->fh(sub { push @queue, $_[0] });
+
+DESCRIPTION
+    Yes... yet another logging module. Nothing particularly fancy nor
+    original, too, but a single-module implementation of the features I use
+    most from Log::Log4perl for quick things, namely:
+
+    *   easy mode and stealth loggers (aka log functions "INFO", "WARN",
+        etc.);
+
+    *   debug message filtering by log level;
+
+    *   line formatting customisation;
+
+    *   quick sending of messages to a log file.
+
+    There are many, many things that are not included; probably the most
+    notable one is the ability to provide a configuration file.
+
+  Why?
+    I have really nothing against Log::Log4perl, to the point that one of
+    the import options is to check whether Log::Log4perl is installed and
+    use it if possible. I just needed to crunch the plethora of modules down
+    to a single-file module, so that I can embed it easily in scripts I use
+    in machines where I want to reduce my impact as much as possible.
+
+  Log Levels
+    Log::Log4perl::Tiny implements all *standard* Log::Log4perl's log
+    levels, without the possibility to change them. The correspondent values
+    are available in the following variables (in order of increasing
+    severity or *importance*):
+
+    $TRACE
+    $DEBUG
+    $INFO
+    $WARN
+    $ERROR
+    $FATAL
+
+    In addition to the above, the following levels are defined as well:
+
+    $OFF
+        also in Log::Log4perl, useful to turn off all logging except for
+        "ALWAYS"
+
+    $DEAD
+        not in Log::Log4perl, when the threshold log level is set to this
+        value every log is blocked (even when called from the "ALWAYS"
+        stealth logger). This is the default log level (but see "Default Log
+        Level" below for more about this).
+
+    You can import these variables using the ":levels" import facility, or
+    you can use the directly from the Log::Log4perl::Tiny namespace. They
+    are imported automatically if the ":easy" import option is specified.
+
+   Default Log Level
+    As of version 1.1.0, the default logging level is $DEAD and no more
+    $INFO. This behaviour is not back-compatible, so you either have to set
+    the log level explicitly after importing the module (e.g. using
+    "easy_init()", "LOGLEVEL()" or calling the "level()" method) or you can
+    set the default log level back to $INFO providing the ":default_to_INFO"
+    import key. In this latter case:
+
+    *   if you already set the log level of the default logger in some way,
+        e.g. calling "LOGLEVEL", before re-importing the module (possibly
+        from a different file/module), it will NOT be changed. This happens
+        also if you set the log level to the same value as the default,
+        because in this case the best guess is that you are explicit about
+        what you want
+
+    *   otherwise, if the default logger still has the default log level set
+        (and it was never changed), it is turned into $INFO
+
+    This is useful if you intend to use this module inside some modules of
+    yours, because it lets you import Log::Log4perl::Tiny *silently*, i.e.
+    without the risk of generating actual log calls, while still giving you
+    the possibility to turn back to the default behaviour of having a $INFO
+    default log level by means of a simple addition in your import line.
+
+  Easy Mode Overview
+    I love Log::Log4perl's easy mode because it lets you set up a
+    sophisticated logging infrastructure with just a few keystrokes:
+
+       use Log::Log4perl qw( :easy );
+       Log::Log4perl->easy_init({
+          file   => '>>/var/log/something.log',
+          layout => '[%d] [%-5P:%-5p] %m%n',
+          level  => $INFO,
+       });
+       INFO 'program started, yay!';
+
+       use Data::Dumper;
+       DEBUG 'Some stuff in main package', sub { Dumper(\%main::) };
+
+    If you want, you can replicate it with just a change in the first line:
+
+       use Log::Log4perl::Tiny qw( :easy );
+       Log::Log4perl->easy_init({
+          file   => '>>/var/log/something.log',
+          layout => '[%d] [%-5P:%-5p] %m%n',
+          level  => $INFO,
+       });
+       INFO 'program started, yay!';
+
+       use Data::Dumper;
+       DEBUG 'Some stuff in main package', sub { Dumper(\%main::) };
+
+    Well... yes, I'm invading the Log::Log4perl namespace in order to reduce
+    the needed changes as mush as possible. This is useful when I begin
+    using Log::Log4perl and then realise I want to make a single script with
+    all modules embedded. There is also another reason why I put
+    "easy_init()" in Log::Log4perl namespace:
+
+       use Log::Log4perl::Tiny qw( :full_or_fake :easy );
+       Log::Log4perl->easy_init({
+          file   => '>>/var/log/something.log',
+          layout => '[%d] [%-5P:%-5p] %m%n',
+          level  => $INFO,
+       });
+       INFO 'program started, yay!';
+
+       use Data::Dumper;
+       DEBUG 'Some stuff in main package', sub { Dumper(\%main::) };
+
+    With import option "full_or_fake", in fact, the module first tries to
+    load Log::Log4perl in the caller's namespace with the provided options
+    (except "full_or_fake", of course), returning immediately if it is
+    successful; otherwise, it tries to "fake" Log::Log4perl and installs its
+    own logging functions. In this way, if Log::Log4perl is available it
+    will be used, but you don't have to change anything if it isn't.
+
+    Easy mode tries to mimic what Log::Log4perl does, or at least the things
+    that (from a purely subjective point of view) are most useful:
+    "easy_init()" and *stealth loggers*.
+
+    NOTE: you MUST initialize the default logger with "easy_init()" before
+    using the easy mode, similarly to what happens (or should happen) with
+    Log::Log4perl. By default the logger's level is set to $DEAD, which
+    means that no log is emitted.
+
+  "easy_init()"
+    Log::Log4perl::Tiny only supports three options from the big brother:
+
+    "level"
+        the log level threshold. Logs sent at a higher or equal priority
+        (i.e. at a more *important* level, or equal) will be printed out,
+        the others will be ignored. The default value is $DEAD;
+
+    "file"
+        a file name where to send the log lines. For compatibility with
+        Log::Log4perl, a 2-arguments "open()" will be performed, which means
+        you can easily set the opening mode, e.g. ">>filename". The default
+        is to send logging messages to "STDERR";
+
+    "layout"
+        the log line layout (it can also be spelled "format", they are
+        synonims). The default value is the following:
+
+           [%d] [%5p] %m%n
+
+        which means *date in brackets, then log level in brackets always
+        using five chars, left-aligned, the log message and a newline*.
+
+    If you call "easy_init()" with a single unblessed scalar, it is
+    considered to be the "level" and it will be set accordingly. Otherwise,
+    you have to pass a hash ref with the keys above.
+
+  Stealth Loggers
+    Stealth loggers are functions that emit a log message at a given
+    severity; they are installed when ":easy" mode is turned on (see "Easy
+    Mode Overview" and the note about initialisation).
+
+    They are named after the corresponding level:
+
+    "TRACE"
+    "DEBUG"
+    "INFO"
+    "WARN"
+    "ERROR"
+    "FATAL"
+
+    Additionally, you get the following logger functions (again, these are
+    in line with Log::Log4perl):
+
+    "ALWAYS"
+        emit log whatever the configured logging level, apart from $OFF that
+        disables all logging;
+
+    "LOGWARN"
+        emit log at "WARN" level, "warn()" and then exit;
+
+    "LOGDIE"
+        emit log at "FATAL" level, "die()" and then exit (if "die()" didn't
+        already exit);
+
+    "LOGEXIT"
+        emit log at "FATAL" level and then exit;
+
+    "LOGCARP"
+        emit log at "WARN" level and then call "Carp::carp()";
+
+    "LOGCLUCK"
+        emit log at "WARN" level and then call "Carp::cluck()";
+
+    "LOGCROAK"
+        emit log at "FATAL" level and then call "Carp::croak()";
+
+    "LOGCONFESS"
+        emit log at "FATAL" level and then call "Carp::confess()";
+
+    If you want to set the exit code for "LOGWARN" and "LOGEXIT" above (and
+    LOGDIE as well, in case "die()" does not exit by itself), you can go
+    "the Log::Log4perl way" and set $Log::Log4perl::LOGEXIT_CODE, or set a
+    code with "logexit_code()" - but you have to wait to read something
+    about the object-oriented interface before doing this!
+
+    There is also one additional stealth function that Log::Log4perl misses
+    but that I think is of the outmoste importance: LOGLEVEL, to set the log
+    level threshold for printing. If you want to be 100% compatible with
+    Log::Log4perl, anyway, you should rather do the following:
+
+       get_logger()->level(...);  # instead of LOGLEVEL(...)
+
+    This function does not get imported when you specify ":easy", anyway, so
+    you have to import it explicitly. This will help you remembering that
+    you are deviating from Log::Log4perl.
+
+  Emitting Logs
+    To emit a log, you can call any of the stealth logger functions or any
+    of the corresponding log methods. All the parameters that you pass are
+    sent to the output stream as they are, except code references that are
+    first evaluated. This lets you embed costly evaluations (e.g. generate
+    heavy dumps of variabls) inside subroutines, and avoid the cost of
+    evaluation in case the log is filtered out:
+
+       use Data::Dumper;
+       LOGLEVEL($INFO); # cut DEBUG and TRACE out
+       TRACE 'costly evaluation: ', sub { Dumper($heavy_object) };
+       # Dumper() is not actually called because DEBUG level is
+       # filtered out
+
+    If you use the "log()" method, the first parameter is the log level,
+    then the others are interpreted as described above.
+
+  Log Line Layout
+    The log line layout sets the contents of a log line. The layout is
+    configured as a "printf"-like string, with placeholder identifiers that
+    are modeled (with simplifications) after Log::Log4perl's ones:
+
+        %c Category of the logging event.
+        %C Fully qualified package (or class) name of the caller
+        %d Current date in yyyy/MM/dd hh:mm:ss format
+        %F File where the logging event occurred
+        %H Hostname
+        %l Fully qualified name of the calling method followed by the
+           callers source the file name and line number between 
+           parentheses.
+        %L Line number within the file where the log statement was issued
+        %m The message to be logged
+        %M Method or function where the logging request was issued
+        %n Newline (OS-independent)
+        %p Priority of the logging event
+        %P pid of the current process
+        %r Number of milliseconds elapsed from program start to logging 
+           event
+        %% A literal percent (%) sign
+
+    Notably, both %x (NDC) and %X (MDC) are missing. Moreover, the extended
+    specifier feature with additional info in braces (like %d{HH:mm}) is
+    missing, i.e. the structure of each specifier above is fixed. (Thanks to
+    "Log::Tiny" for the cool trick of how to handle the "printf"-like
+    string, which is probably mutuated from "Log::Log4perl" itself according
+    to the comments).
+
+INTERFACE
+    You have two interfaces at your disposal, the functional one (with all
+    the stealth logger functions) and the object-oriented one (with explicit
+    actions upon a logger object). Choose your preferred option.
+
+  Functional Interface
+    The functional interface sports the following functions (imported
+    automatically when ":easy" is passed as import option except for
+    "LOGLEVEL"):
+
+    "TRACE"
+    "DEBUG"
+    "INFO"
+    "WARN"
+    "ERROR"
+    "FATAL"
+        stealth logger functions, each emits a log at the corresponding
+        level;
+
+    "ALWAYS"
+        emit log whatever the configured logging level (except $DEAD);
+
+    "LOGWARN"
+        emit log at "WARN" level, "warn()" and then exit;
+
+    "LOGDIE"
+        emit log at "FATAL" level, "die()" and then exit (if "die()" didn't
+        already exit);
+
+    "LOGEXIT"
+        emit log at "FATAL" level and then exit;
+
+    "LOGCARP"
+        emit log at "WARN" level and then call "Carp::carp()";
+
+    "LOGCLUCK"
+        emit log at "WARN" level and then call "Carp::cluck()";
+
+    "LOGCROAK"
+        emit log at "FATAL" level and then call "Carp::croak()";
+
+    "LOGCONFESS"
+        emit log at "FATAL" level and then call "Carp::confess()";
+
+    "LOGLEVEL"
+        (Not in Log::Log4perl) (Not imported with ":easy")
+
+        set the minimum log level for sending a log message to the output;
+
+  Object-Oriented Interface
+    The functional interface is actually based upon actions on a pre-defined
+    fixed instance of a "Log::Log4perl::Tiny" object, so you can do the same
+    with a logger object as well:
+
+    "get_logger"
+        this function gives you the pre-defined logger instance (i.e. the
+        same used by the stealth logger functions described above).
+
+    "new"
+        if for obscure reasons the default logger isn't what you want, you
+        can get a brand new object! The constructor accepts either a list of
+        key-values or a reference to a hash, supporting the following keys:
+
+        format
+        layout
+        file
+        level
+            see "easy_init()" and the methods below with the same name
+
+        fh  see method "fh" below
+
+    However you get a logger object, remember that the default log level is
+    set to $DEAD, which means that your object will not actually log
+    anything unless you set the threshold that you see fit.
+
+    The methods you can call upon the object mimic the functional interface,
+    but with lowercase method names:
+
+    "trace"
+    "debug"
+    "info"
+    "warn"
+    "error"
+    "fatal"
+        logging functions, each emits a log at the corresponding level;
+
+    "always"
+        emit log whatever the configured logging level;
+
+    "logwarn"
+        emit log at "WARN" level, "warn()" and then exit;
+
+    "logdie"
+        emit log at "FATAL" level, "die()" and then exit (if "die()" didn't
+        already exit);
+
+    "logexit"
+        emit log at "FATAL" level and then exit;
+
+    "logcarp"
+        emit log at "WARN" level and then call "Carp::carp()";
+
+    "logcluck"
+        emit log at "WARN" level and then call "Carp::cluck()";
+
+    "logcroak"
+        emit log at "FATAL" level and then call "Carp::croak()";
+
+    "logconfess"
+        emit log at "FATAL" level and then call "Carp::confess()";
+
+    The main logging function is actually the following:
+
+    "log"
+        the first parameter is the log level, the rest is the message to log
+        apart from references to subroutines that are first evaluated
+
+    Additionally, you have the following accessors:
+
+    "level"
+        get/set the minimum level for sending messages to the output stream.
+        By default the level is set to $DEAD and all logging is disabled, so
+        you should set it in some way.
+
+    "fh"
+        get/set the output filehandle.
+
+        As an extention over Log::Log4perl, you can also set a reference to
+        a subroutine as a filehandle, in which case it will be called with
+        two parameters: the message that would be print and a reference to
+        the logger object that is calling the sub. For example, if you
+        simply want to collect the log messages without actually outputting
+        them anywhere, you can do this:
+
+           my @messages;
+           get_logger()->fh(sub {
+              my ($message, $logger) = @_;
+              push @messages, $message;
+              return;
+           });
+
+        By default this parameter is set to be equal to "STDERR".
+
+    "format"
+    "layout"
+        get/set the line formatting;
+
+    "logexit_code"
+        get/set the exit code to be used with "logexit()" and "logwarn()"
+        (and "logdie()" as well if "die()" doesn't exit).
+
+DEPENDENCIES
+    None.
+
+BUGS AND LIMITATIONS
+    No bugs have been reported.
+
+    Please report any bugs or feature requests through http://rt.cpan.org/
+
+SEE ALSO
+    Log::Log4perl is one of the most useful modules I ever used, go check
+    it!
+
+AUTHOR
+    Flavio Poletti <polettix@cpan.org>
+
+COPYRIGHT AND LICENSE
+    Copyright (C) 2010 by Flavio Poletti <polettix@cpan.org>.
+
+    This module is free software. You can redistribute it and/or modify it
+    under the terms of the Artistic License 2.0.
+
+    This program is distributed in the hope that it will be useful, but
+    without any warranty; without even the implied warranty of
+    merchantability or fitness for a particular purpose.
 

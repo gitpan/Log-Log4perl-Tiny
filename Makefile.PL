@@ -2,9 +2,9 @@
 use strict;
 use warnings;
 
-BEGIN { require 5.008_000; }
+use 5.008_000;
 
-use ExtUtils::MakeMaker 6.31;
+use ExtUtils::MakeMaker 6.30;
 
 
 
@@ -13,14 +13,14 @@ my %WriteMakefileArgs = (
   'AUTHOR' => 'Flavio Poletti <polettix@cpan.org>',
   'BUILD_REQUIRES' => {},
   'CONFIGURE_REQUIRES' => {
-    'ExtUtils::MakeMaker' => '6.31'
+    'ExtUtils::MakeMaker' => '6.30'
   },
   'DISTNAME' => 'Log-Log4perl-Tiny',
   'EXE_FILES' => [],
   'LICENSE' => 'artistic_2',
   'NAME' => 'Log::Log4perl::Tiny',
   'PREREQ_PM' => {},
-  'VERSION' => '1.0.0',
+  'VERSION' => '1.0.1_01',
   'test' => {
     'TESTS' => 't/*.t'
   }

@@ -12,7 +12,13 @@ t/03.fake.t
 t/04.object.t
 t/05.format.t
 t/06.sub.t
+t/07.off.t
+t/08.code_as_fh.t
 t/10.easy.t
+t/11.always.t
+t/20.default_level.t
+t/21.default_to_INFO.t
+t/22.change_default.t
 t/TestLLT.pm
 t/pod-coverage.t
 t/pod.t
