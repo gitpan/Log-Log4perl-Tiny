@@ -17,8 +17,9 @@ t/08.code_as_fh.t
 t/10.easy.t
 t/11.always.t
 t/20.default_level.t
-t/21.default_to_INFO.t
-t/22.change_default.t
+t/21.dead_if_first.t
+t/22.dead_not_firing.t
+t/23.dead_not_kept.t
 t/TestLLT.pm
 t/pod-coverage.t
 t/pod.t

@@ -2,7 +2,7 @@ NAME
     Log::Log4perl::Tiny - mimic Log::Log4perl in one single module
 
 VERSION
-    version 1.0.1_01
+    version 1.0.1_2
 
 SYNOPSIS
        use Log::Log4perl::Tiny qw( :easy );
@@ -88,7 +88,8 @@ DESCRIPTION
     $ERROR
     $FATAL
 
-    In addition to the above, the following levels are defined as well:
+    The default log level is $INFO. In addition to the above, the following
+    levels are defined as well:
 
     $OFF
         also in Log::Log4perl, useful to turn off all logging except for
@@ -97,36 +98,35 @@ DESCRIPTION
     $DEAD
         not in Log::Log4perl, when the threshold log level is set to this
         value every log is blocked (even when called from the "ALWAYS"
-        stealth logger). This is the default log level (but see "Default Log
-        Level" below for more about this).
+        stealth logger).
 
     You can import these variables using the ":levels" import facility, or
     you can use the directly from the Log::Log4perl::Tiny namespace. They
     are imported automatically if the ":easy" import option is specified.
 
    Default Log Level
-    As of version 1.1.0, the default logging level is $DEAD and no more
-    $INFO. This behaviour is not back-compatible, so you either have to set
-    the log level explicitly after importing the module (e.g. using
-    "easy_init()", "LOGLEVEL()" or calling the "level()" method) or you can
-    set the default log level back to $INFO providing the ":default_to_INFO"
-    import key. In this latter case:
+    As of version 1.1.0 the default logging level is still $INFO like any
+    previous version, but it is possible to modify this value to $DEAD
+    through the ":dead_if_first" import key.
 
-    *   if you already set the log level of the default logger in some way,
-        e.g. calling "LOGLEVEL", before re-importing the module (possibly
-        from a different file/module), it will NOT be changed. This happens
-        also if you set the log level to the same value as the default,
-        because in this case the best guess is that you are explicit about
-        what you want
+    This import key is useful to load Log::Log4perl in modules that you want
+    to publish but where you don't want to force the end user to actually
+    use it. In other terms, if you do this:
 
-    *   otherwise, if the default logger still has the default log level set
-        (and it was never changed), it is turned into $INFO
+       package My::Module;
+       use Log::Log4perl::Tiny qw( :easy :dead_if_first );
 
-    This is useful if you intend to use this module inside some modules of
-    yours, because it lets you import Log::Log4perl::Tiny *silently*, i.e.
-    without the risk of generating actual log calls, while still giving you
-    the possibility to turn back to the default behaviour of having a $INFO
-    default log level by means of a simple addition in your import line.
+    you will import all the functionalities associated to ":easy" but will
+    silence the logger off *unless* somewhere else the module is loaded (and
+    imported) without this option. In this way:
+
+    *   if the user of your module does *not* import Log::Log4perl::Tiny,
+        all log messages will be dropped (thanks to the log level set to
+        $DEAD)
+
+    *   otherwise, if the user imports Log::Log4perl::Tiny without the
+        option, the log level will be set to the default value (unless it
+        has already been explicitly set somewhere else).
 
   Easy Mode Overview
     I love Log::Log4perl's easy mode because it lets you set up a
@@ -184,18 +184,13 @@ DESCRIPTION
     that (from a purely subjective point of view) are most useful:
     "easy_init()" and *stealth loggers*.
 
-    NOTE: you MUST initialize the default logger with "easy_init()" before
-    using the easy mode, similarly to what happens (or should happen) with
-    Log::Log4perl. By default the logger's level is set to $DEAD, which
-    means that no log is emitted.
-
   "easy_init()"
     Log::Log4perl::Tiny only supports three options from the big brother:
 
     "level"
         the log level threshold. Logs sent at a higher or equal priority
         (i.e. at a more *important* level, or equal) will be printed out,
-        the others will be ignored. The default value is $DEAD;
+        the others will be ignored. The default value is $INFO;
 
     "file"
         a file name where to send the log lines. For compatibility with
@@ -219,7 +214,7 @@ DESCRIPTION
   Stealth Loggers
     Stealth loggers are functions that emit a log message at a given
     severity; they are installed when ":easy" mode is turned on (see "Easy
-    Mode Overview" and the note about initialisation).
+    Mode Overview").
 
     They are named after the corresponding level:
 
@@ -394,10 +389,6 @@ INTERFACE
 
         fh  see method "fh" below
 
-    However you get a logger object, remember that the default log level is
-    set to $DEAD, which means that your object will not actually log
-    anything unless you set the threshold that you see fit.
-
     The methods you can call upon the object mimic the functional interface,
     but with lowercase method names:
 
@@ -444,8 +435,7 @@ INTERFACE
 
     "level"
         get/set the minimum level for sending messages to the output stream.
-        By default the level is set to $DEAD and all logging is disabled, so
-        you should set it in some way.
+        By default the level is set to $INFO.
 
     "fh"
         get/set the output filehandle.
