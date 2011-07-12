@@ -2,7 +2,7 @@ NAME
     Log::Log4perl::Tiny - mimic Log::Log4perl in one single module
 
 VERSION
-    version 1.0.1_2
+    version 1.1.0
 
 SYNOPSIS
        use Log::Log4perl::Tiny qw( :easy );
@@ -255,14 +255,14 @@ DESCRIPTION
         emit log at "FATAL" level and then call "Carp::confess()";
 
     If you want to set the exit code for "LOGWARN" and "LOGEXIT" above (and
-    LOGDIE as well, in case "die()" does not exit by itself), you can go
+    "LOGDIE" as well, in case "die()" does not exit by itself), you can go
     "the Log::Log4perl way" and set $Log::Log4perl::LOGEXIT_CODE, or set a
     code with "logexit_code()" - but you have to wait to read something
     about the object-oriented interface before doing this!
 
     There is also one additional stealth function that Log::Log4perl misses
-    but that I think is of the outmoste importance: LOGLEVEL, to set the log
-    level threshold for printing. If you want to be 100% compatible with
+    but that I think is of the outmoste importance: "LOGLEVEL", to set the
+    log level threshold for printing. If you want to be 100% compatible with
     Log::Log4perl, anyway, you should rather do the following:
 
        get_logger()->level(...);  # instead of LOGLEVEL(...)

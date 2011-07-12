@@ -20,7 +20,7 @@ my %WriteMakefileArgs = (
   'LICENSE' => 'artistic_2',
   'NAME' => 'Log::Log4perl::Tiny',
   'PREREQ_PM' => {},
-  'VERSION' => '1.0.1_2',
+  'VERSION' => '1.1.0',
   'test' => {
     'TESTS' => 't/*.t'
   }

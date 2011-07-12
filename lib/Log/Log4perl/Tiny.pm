@@ -1,6 +1,6 @@
 package Log::Log4perl::Tiny;
 BEGIN {
-  $Log::Log4perl::Tiny::VERSION = '1.0.1_2';
+  $Log::Log4perl::Tiny::VERSION = '1.1.0';
 }
 # ABSTRACT: mimic Log::Log4perl in one single module
 
@@ -76,9 +76,6 @@ sub import {
       elsif (lc($item) eq ':dead_if_first') {
          get_logger()->_set_level_if_first($DEAD);
          $level_set = 1;
-      }
-      else {
-         croak "unsupported import option '$item'";
       }
    } ## end for my $item (@list)
 
@@ -369,7 +366,7 @@ Log::Log4perl::Tiny - mimic Log::Log4perl in one single module
 
 =head1 VERSION
 
-version 1.0.1_2
+version 1.1.0
 
 =head1 SYNOPSIS
 
@@ -693,14 +690,14 @@ emit log at C<FATAL> level and then call C<Carp::confess()>;
 =back
 
 If you want to set the exit code for C<LOGWARN> and C<LOGEXIT> above
-(and L<LOGDIE> as well, in case C<die()> does not exit by itself),
+(and C<LOGDIE> as well, in case C<die()> does not exit by itself),
 you can go "the L<Log::Log4perl> way" and set
 C<$Log::Log4perl::LOGEXIT_CODE>, or set a code with
 C<logexit_code()> - but you have to wait to read something about the
 object-oriented interface before doing this!
 
 There is also one additional stealth function that L<Log::Log4perl>
-misses but that I think is of the outmoste importance: L<LOGLEVEL>, to
+misses but that I think is of the outmoste importance: C<LOGLEVEL>, to
 set the log level threshold for printing. If you want to be 100%
 compatible with Log::Log4perl, anyway, you should rather do the following:
 
