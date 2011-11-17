@@ -1,3 +1,7 @@
+1.1.0_01  2011-11-17 02:29:44 Europe/Rome
+   - solved bug https://rt.cpan.org/Ticket/Display.html?id=72476
+     (thanks to Jonathan Wilson for pointing out)
+
 1.1.0     2011-07-12 08:50:25 Europe/Rome
    - final fixes to the documentation
    - removed die-ing when option is not recognised

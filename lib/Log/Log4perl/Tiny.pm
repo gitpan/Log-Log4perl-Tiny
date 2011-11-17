@@ -1,6 +1,6 @@
 package Log::Log4perl::Tiny;
-BEGIN {
-  $Log::Log4perl::Tiny::VERSION = '1.1.0';
+{
+  $Log::Log4perl::Tiny::VERSION = '1.1.0_01';
 }
 # ABSTRACT: mimic Log::Log4perl in one single module
 
@@ -261,7 +261,17 @@ BEGIN {
    my $last_log = $^T;
    %format_for = (    # specifiers according to Log::Log4perl
       c => [s => sub { 'main' }],
-      C => [s => sub { (caller(4))[0] },],
+      C => [
+         s => sub {
+            my ($internal_package) = caller 0;
+            for my $i (1 .. 4) {
+               my ($package) = caller $i;
+               last unless defined $package;
+               return $package if $package ne $internal_package;
+            }
+            return '*undef*';
+           }
+      ],
       d => [
          s => sub {
             my ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday,
@@ -366,7 +376,7 @@ Log::Log4perl::Tiny - mimic Log::Log4perl in one single module
 
 =head1 VERSION
 
-version 1.1.0
+version 1.1.0_01
 
 =head1 SYNOPSIS
 
