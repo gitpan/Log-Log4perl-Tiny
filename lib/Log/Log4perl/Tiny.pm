@@ -1,7 +1,8 @@
 package Log::Log4perl::Tiny;
 {
-  $Log::Log4perl::Tiny::VERSION = '1.1.2';
+  $Log::Log4perl::Tiny::VERSION = '1.2.0';
 }
+
 # ABSTRACT: mimic Log::Log4perl in one single module
 
 use warnings;
@@ -28,7 +29,7 @@ sub import {
    } ## end if (grep { $_ eq ':full_or_fake'...
 
    my (%done, $level_set);
-   ITEM:
+ ITEM:
    for my $item (@list) {
       next ITEM if $done{$item};
       $done{$item} = 1;
@@ -68,7 +69,7 @@ sub import {
                   $_instance->level($conf);
                }
             };
-         } ## end if (!Log::Log4perl->can...
+         } ## end if (!'Log::Log4perl'->can...
       } ## end elsif ($item =~ /\A : (mimic | mask | fake) \z/mxs)
       elsif ($item eq ':easy') {
          push @list, qw( :levels :subs :fake );
@@ -79,7 +80,7 @@ sub import {
       }
    } ## end for my $item (@list)
 
-   if (! $level_set) {
+   if (!$level_set) {
       my $logger = get_logger();
       $logger->_set_level_if_first($INFO);
       $logger->level($logger->level());
@@ -107,8 +108,8 @@ sub new {
    } ## end if (exists $args{file})
 
    my $self = bless {
-      fh     => \*STDERR,
-      level  => $INFO,
+      fh    => \*STDERR,
+      level => $INFO,
    }, $package;
 
    for my $accessor (qw( level fh format )) {
@@ -242,18 +243,18 @@ sub level {
       return unless exists $id_for{$level};
       $self->{level} = $id_for{$level};
       $self->{_count}++;
-   }
+   } ## end if (@_)
    return $self->{level};
-}
+} ## end sub level
 
 sub _set_level_if_first {
    my ($self, $level) = @_;
-   if (! $self->{_count}) {
+   if (!$self->{_count}) {
       $self->level($level);
       delete $self->{_count};
    }
    return;
-}
+} ## end sub _set_level_if_first
 
 BEGIN {
 
@@ -326,10 +327,19 @@ BEGIN {
    no strict 'refs';
 
    for my $name (qw( FATAL ERROR WARN INFO DEBUG TRACE )) {
+
+      # create the ->level methods
       *{__PACKAGE__ . '::' . lc($name)} = sub {
          my $self = shift;
          return $self->log($$name, @_);
       };
+
+      # create ->is_level and ->isLevelEnabled methods as well
+      *{__PACKAGE__ . '::is' . ucfirst(lc($name)) . 'Enabled'} =
+        *{__PACKAGE__ . '::is_' . lc($name)} = sub {
+         return 0 if $_[0]->{level} == $DEAD || $$name > $_[0]->{level};
+         return 1;
+        };
    } ## end for my $name (qw( FATAL ERROR WARN INFO DEBUG TRACE ))
 
    for my $name (
@@ -352,15 +362,15 @@ BEGIN {
          $self->{$accessor} = shift if @_;
          return $self->{$accessor};
       };
-   } ## end for my $accessor (qw( level fh logexit_code ))
+   } ## end for my $accessor (qw( fh logexit_code ))
 
    my $index = -1;
    for my $name (qw( DEAD OFF FATAL ERROR WARN INFO DEBUG TRACE )) {
       $name_of{$$name = $index} = $name;
-      $id_for{$name} = $index;
+      $id_for{$name}  = $index;
       $id_for{$index} = $index;
       ++$index;
-   }
+   } ## end for my $name (qw( DEAD OFF FATAL ERROR WARN INFO DEBUG TRACE ))
 
    get_logger();    # initialises $_instance;
 } ## end BEGIN
@@ -376,7 +386,7 @@ Log::Log4perl::Tiny - mimic Log::Log4perl in one single module
 
 =head1 VERSION
 
-version 1.1.2
+version 1.2.0
 
 =head1 SYNOPSIS
 
@@ -894,6 +904,32 @@ interface, but with lowercase method names:
 =item C<< fatal >>
 
 logging functions, each emits a log at the corresponding level;
+
+=item C<< is_trace >>
+
+=item C<< is_debug >>
+
+=item C<< is_info >>
+
+=item C<< is_warn >>
+
+=item C<< is_error >>
+
+=item C<< is_fatal >>
+
+=item C<< isTraceEnabled >>
+
+=item C<< isDebugEnabled >>
+
+=item C<< isInfoEnabled >>
+
+=item C<< isWarnEnabled >>
+
+=item C<< isErrorEnabled >>
+
+=item C<< isFatalEnabled >>
+
+log level test functions, each returns the status of the corresponding level;
 
 =item C<< always >>
 

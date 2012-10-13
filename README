@@ -2,7 +2,7 @@ NAME
     Log::Log4perl::Tiny - mimic Log::Log4perl in one single module
 
 VERSION
-    version 1.1.2
+    version 1.2.0
 
 SYNOPSIS
        use Log::Log4perl::Tiny qw( :easy );
@@ -399,6 +399,21 @@ INTERFACE
     "error"
     "fatal"
         logging functions, each emits a log at the corresponding level;
+
+    "is_trace"
+    "is_debug"
+    "is_info"
+    "is_warn"
+    "is_error"
+    "is_fatal"
+    "isTraceEnabled"
+    "isDebugEnabled"
+    "isInfoEnabled"
+    "isWarnEnabled"
+    "isErrorEnabled"
+    "isFatalEnabled"
+        log level test functions, each returns the status of the
+        corresponding level;
 
     "always"
         emit log whatever the configured logging level;
