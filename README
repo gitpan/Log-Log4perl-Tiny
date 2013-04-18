@@ -2,7 +2,7 @@ NAME
     Log::Log4perl::Tiny - mimic Log::Log4perl in one single module
 
 VERSION
-    version 1.2.0
+    version 1.2.1
 
 SYNOPSIS
        use Log::Log4perl::Tiny qw( :easy );
@@ -419,7 +419,7 @@ INTERFACE
         emit log whatever the configured logging level;
 
     "logwarn"
-        emit log at "WARN" level, "warn()" and then exit;
+        emit log at "WARN" level (if allowed) and "warn()" (always);
 
     "logdie"
         emit log at "FATAL" level, "die()" and then exit (if "die()" didn't
@@ -476,8 +476,8 @@ INTERFACE
         get/set the line formatting;
 
     "logexit_code"
-        get/set the exit code to be used with "logexit()" and "logwarn()"
-        (and "logdie()" as well if "die()" doesn't exit).
+        get/set the exit code to be used with "logexit()" (and "logdie()" as
+        well if "die()" doesn't exit).
 
 DEPENDENCIES
     None.

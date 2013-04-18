@@ -1,6 +1,6 @@
 package Log::Log4perl::Tiny;
 {
-  $Log::Log4perl::Tiny::VERSION = '1.2.0';
+  $Log::Log4perl::Tiny::VERSION = '1.2.1';
 }
 
 # ABSTRACT: mimic Log::Log4perl in one single module
@@ -191,7 +191,6 @@ sub logwarn {
    my $self = shift;
    $self->warn(@_);
    CORE::warn(@_);
-   $self->_exit();
 } ## end sub logwarn
 
 sub logdie {
@@ -386,7 +385,7 @@ Log::Log4perl::Tiny - mimic Log::Log4perl in one single module
 
 =head1 VERSION
 
-version 1.2.0
+version 1.2.1
 
 =head1 SYNOPSIS
 
@@ -937,7 +936,7 @@ emit log whatever the configured logging level;
 
 =item C<< logwarn >>
 
-emit log at C<WARN> level, C<warn()> and then exit;
+emit log at C<WARN> level (if allowed) and C<warn()> (always);
 
 =item C<< logdie >>
 
@@ -1014,7 +1013,7 @@ get/set the line formatting;
 
 =item C<< logexit_code >>
 
-get/set the exit code to be used with C<logexit()> and C<logwarn()> (and
+get/set the exit code to be used with C<logexit()> (and
 C<logdie()> as well if C<die()> doesn't exit).
 
 =back
