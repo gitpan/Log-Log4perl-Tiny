@@ -1,6 +1,6 @@
 package Log::Log4perl::Tiny;
 {
-  $Log::Log4perl::Tiny::VERSION = '1.2.1';
+  $Log::Log4perl::Tiny::VERSION = '1.2.2';
 }
 
 # ABSTRACT: mimic Log::Log4perl in one single module
@@ -190,13 +190,34 @@ sub _exit {
 sub logwarn {
    my $self = shift;
    $self->warn(@_);
+
+   # default warning when nothing is passed to warn
+   push @_, "Warning: something's wrong" unless @_;
+
+   # add 'at <file> line <line>' unless argument ends in "\n";
+   my (undef, $file, $line) = caller(1);
+   push @_, sprintf " at %s line %d.\n", $file, $line
+      if substr($_[-1], -1, 1) ne "\n";
+
+   # go for it!
    CORE::warn(@_);
 } ## end sub logwarn
 
 sub logdie {
    my $self = shift;
    $self->fatal(@_);
+
+   # default die message when nothing is passed to die
+   push @_, "Died" unless @_;
+
+   # add 'at <file> line <line>' unless argument ends in "\n";
+   my (undef, $file, $line) = caller(1);
+   push @_, sprintf " at %s line %d.\n", $file, $line
+      if substr($_[-1], -1, 1) ne "\n";
+
+   # go for it!
    CORE::die(@_);
+
    $self->_exit();
 } ## end sub logdie
 
@@ -210,6 +231,7 @@ sub logcarp {
    my $self = shift;
    $self->warn(@_);
    require Carp;
+   $Carp::Internal{$_} = 1 for __PACKAGE__;
    Carp::carp(@_);
 } ## end sub logcarp
 
@@ -217,6 +239,7 @@ sub logcluck {
    my $self = shift;
    $self->warn(@_);
    require Carp;
+   $Carp::Internal{$_} = 1 for __PACKAGE__;
    Carp::cluck(@_);
 } ## end sub logcluck
 
@@ -224,6 +247,7 @@ sub logcroak {
    my $self = shift;
    $self->fatal(@_);
    require Carp;
+   $Carp::Internal{$_} = 1 for __PACKAGE__;
    Carp::croak(@_);
 } ## end sub logcroak
 
@@ -231,6 +255,7 @@ sub logconfess {
    my $self = shift;
    $self->fatal(@_);
    require Carp;
+   $Carp::Internal{$_} = 1 for __PACKAGE__;
    Carp::confess(@_);
 } ## end sub logconfess
 
@@ -280,7 +305,17 @@ BEGIN {
               $year + 1900, $mon + 1, $mday, $hour, $min, $sec;
            }
       ],
-      F => [s => sub { (caller(3))[1] },],
+      F => [
+         s => sub {
+            my ($internal_package) = caller 0;
+            for my $i (1 .. 4) {
+               my ($package, $file) = caller $i;
+               last unless defined $package;
+               return $file if $package ne $internal_package;
+            }
+            return '*undef*';
+           }
+      ],
       H => [
          s => sub {
             eval { require Sys::Hostname; Sys::Hostname::hostname() }
@@ -294,7 +329,17 @@ BEGIN {
             sprintf '%s %s (%d)', $subroutine, $filename, $line;
            }
       ],
-      L => [d => sub { (caller(3))[2] },],
+      L => [
+         d => sub {
+            my ($internal_package) = caller 0;
+            for my $i (1 .. 4) {
+               my ($package, undef, $line) = caller $i;
+               last unless defined $package;
+               return $line if $package ne $internal_package;
+            }
+            return -1;
+           }
+      ],
       m => [
          s => sub {
             join(
@@ -303,7 +348,17 @@ BEGIN {
             );
          },
       ],
-      M => [s => sub { (caller(4))[3] },],
+      M => [
+         s => sub {
+            my ($internal_package) = caller 0;
+            for my $i (1 .. 4) {
+               my ($package) = caller $i;
+               last unless defined $package;
+               return (caller($i + 1))[3] if $package ne $internal_package;
+            }
+            return '*undef*';
+           }
+      ],
       n => [s => sub { $/ },],
       p => [s => sub { $name_of{shift->{level}} },],
       P => [d => sub { $$ },],
@@ -385,7 +440,7 @@ Log::Log4perl::Tiny - mimic Log::Log4perl in one single module
 
 =head1 VERSION
 
-version 1.2.1
+version 1.2.2
 
 =head1 SYNOPSIS
 
