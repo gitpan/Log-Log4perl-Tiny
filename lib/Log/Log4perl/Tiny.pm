@@ -1,6 +1,6 @@
 package Log::Log4perl::Tiny;
 {
-  $Log::Log4perl::Tiny::VERSION = '1.2.2';
+  $Log::Log4perl::Tiny::VERSION = '1.2.3';
 }
 
 # ABSTRACT: mimic Log::Log4perl in one single module
@@ -359,7 +359,7 @@ BEGIN {
             return '*undef*';
            }
       ],
-      n => [s => sub { $/ },],
+      n => [s => sub { "\n" },],
       p => [s => sub { $name_of{shift->{level}} },],
       P => [d => sub { $$ },],
       r => [d => sub { time - $^T },],
@@ -440,7 +440,7 @@ Log::Log4perl::Tiny - mimic Log::Log4perl in one single module
 
 =head1 VERSION
 
-version 1.2.2
+version 1.2.3
 
 =head1 SYNOPSIS
 
@@ -734,7 +734,7 @@ disables all logging;
 
 =item C<< LOGWARN >>
 
-emit log at C<WARN> level, C<warn()> and then exit;
+emit log at C<WARN> level and then C<warn()> it;
 
 =item C<< LOGDIE >>
 
@@ -763,7 +763,7 @@ emit log at C<FATAL> level and then call C<Carp::confess()>;
 
 =back
 
-If you want to set the exit code for C<LOGWARN> and C<LOGEXIT> above
+If you want to set the exit code for C<LOGEXIT> above
 (and C<LOGDIE> as well, in case C<die()> does not exit by itself),
 you can go "the L<Log::Log4perl> way" and set
 C<$Log::Log4perl::LOGEXIT_CODE>, or set a code with
@@ -864,7 +864,7 @@ emit log whatever the configured logging level (except C<$DEAD>);
 
 =item C<< LOGWARN >>
 
-emit log at C<WARN> level, C<warn()> and then exit;
+emit log at C<WARN> level and then C<warn()> it;
 
 =item C<< LOGDIE >>
 
@@ -1093,7 +1093,7 @@ Flavio Poletti <polettix@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2010 by Flavio Poletti <polettix@cpan.org>.
+Copyright (C) 2010-2013 by Flavio Poletti <polettix@cpan.org>.
 
 This module is free software.  You can redistribute it and/or
 modify it under the terms of the Artistic License 2.0.

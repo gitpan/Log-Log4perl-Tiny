@@ -2,7 +2,7 @@ NAME
     Log::Log4perl::Tiny - mimic Log::Log4perl in one single module
 
 VERSION
-    version 1.2.2
+    version 1.2.3
 
 SYNOPSIS
        use Log::Log4perl::Tiny qw( :easy );
@@ -233,7 +233,7 @@ DESCRIPTION
         disables all logging;
 
     "LOGWARN"
-        emit log at "WARN" level, "warn()" and then exit;
+        emit log at "WARN" level and then "warn()" it;
 
     "LOGDIE"
         emit log at "FATAL" level, "die()" and then exit (if "die()" didn't
@@ -254,11 +254,11 @@ DESCRIPTION
     "LOGCONFESS"
         emit log at "FATAL" level and then call "Carp::confess()";
 
-    If you want to set the exit code for "LOGWARN" and "LOGEXIT" above (and
-    "LOGDIE" as well, in case "die()" does not exit by itself), you can go
-    "the Log::Log4perl way" and set $Log::Log4perl::LOGEXIT_CODE, or set a
-    code with "logexit_code()" - but you have to wait to read something
-    about the object-oriented interface before doing this!
+    If you want to set the exit code for "LOGEXIT" above (and "LOGDIE" as
+    well, in case "die()" does not exit by itself), you can go "the
+    Log::Log4perl way" and set $Log::Log4perl::LOGEXIT_CODE, or set a code
+    with "logexit_code()" - but you have to wait to read something about the
+    object-oriented interface before doing this!
 
     There is also one additional stealth function that Log::Log4perl misses
     but that I think is of the outmoste importance: "LOGLEVEL", to set the
@@ -341,7 +341,7 @@ INTERFACE
         emit log whatever the configured logging level (except $DEAD);
 
     "LOGWARN"
-        emit log at "WARN" level, "warn()" and then exit;
+        emit log at "WARN" level and then "warn()" it;
 
     "LOGDIE"
         emit log at "FATAL" level, "die()" and then exit (if "die()" didn't
@@ -495,7 +495,7 @@ AUTHOR
     Flavio Poletti <polettix@cpan.org>
 
 COPYRIGHT AND LICENSE
-    Copyright (C) 2010 by Flavio Poletti <polettix@cpan.org>.
+    Copyright (C) 2010-2013 by Flavio Poletti <polettix@cpan.org>.
 
     This module is free software. You can redistribute it and/or modify it
     under the terms of the Artistic License 2.0.
