@@ -2,12 +2,12 @@ NAME
     Log::Log4perl::Tiny - mimic Log::Log4perl in one single module
 
 VERSION
-    version 1.2.3
+    version 1.2.4_01
 
 SYNOPSIS
        use Log::Log4perl::Tiny qw( :easy );
        Log::Log4perl->easy_init({
-          file   => '>>/var/log/something.log',
+          file   => '/var/log/something.log',
           layout => '[%d] [%-5P:%-5p] %m%n',
           level  => $INFO,
        });
@@ -195,8 +195,19 @@ DESCRIPTION
     "file"
         a file name where to send the log lines. For compatibility with
         Log::Log4perl, a 2-arguments "open()" will be performed, which means
-        you can easily set the opening mode, e.g. ">>filename". The default
-        is to send logging messages to "STDERR";
+        you can easily set the opening mode, e.g. ">>filename".
+
+        Note that the 2-arguments "open()" is intrinsically insecure and
+        will trigger the following error when running setuid:
+
+           Insecure dependency in open while running setuid
+
+        so be sure to use either "file_create" or "file_append" instead if
+        you're running setuid. These are extensions added by
+        Log::Log4perl::Tiny to cope with this specific case (and also to
+        allow you avoid the 2-args "open()" anyway).
+
+        The default is to send logging messages to "STDERR";
 
     "layout"
         the log line layout (it can also be spelled "format", they are
@@ -210,6 +221,11 @@ DESCRIPTION
     If you call "easy_init()" with a single unblessed scalar, it is
     considered to be the "level" and it will be set accordingly. Otherwise,
     you have to pass a hash ref with the keys above.
+
+    In addition to the above keys, the "easy_init()" method installed by
+    Log::Log4perl::Tiny also accepts all keys defined for "new", e.g.
+    "format" (an alias for "layout") and the different alternatives to
+    "file" ("file_insecure", "file_create" and "file_append").
 
   Stealth Loggers
     Stealth loggers are functions that emit a log message at a given
@@ -309,6 +325,8 @@ DESCRIPTION
         %P pid of the current process
         %r Number of milliseconds elapsed from program start to logging 
            event
+        %R Number of milliseconds elapsed from last logging event including
+           a %R to current logging event
         %% A literal percent (%) sign
 
     Notably, both %x (NDC) and %X (MDC) are missing. Moreover, the extended
@@ -381,9 +399,39 @@ INTERFACE
         can get a brand new object! The constructor accepts either a list of
         key-values or a reference to a hash, supporting the following keys:
 
+        file
+        file_insecure
+        file_create
+        file_append
+            set the file where log data should be sent. This option takes
+            precedence over "fh" below.
+
+            The first one is kept for compliance with
+            Log::Log4perl::easy_init's way of accepting a file. It
+            eventually results in a two-arguments "open()" call, so that you
+            can quickly set how you want to open the file:
+
+               file => '>>/path/to/appended', # append mode
+               file => '>/path/to/new-file',  # create mode
+
+            You should avoid doing this, because it is intrinsically
+            insecure and will yield an error message when running setuid:
+
+               Insecure dependency in open while running setuid
+
+            "file_insecure" is an alias to "file", so that you can
+            explicitly signal to the maintainer that you know what you're
+            doing.
+
+            "file_create" and "file_append" will use the three-arguments
+            "open()" call and thus they don't trigger the error above when
+            running setuid. As the respective names suggest the former
+            creates the file from scratch (possibly deleting any previous
+            file with the same path) while the latter opens the file in
+            append mode.
+
         format
         layout
-        file
         level
             see "easy_init()" and the methods below with the same name
 
