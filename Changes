@@ -1,3 +1,6 @@
+1.2.4_02  2013-08-04 02:43:05 Europe/Rome
+   - made test of %r and %R more robust (hopefully)
+
 1.2.4_01  2013-08-03 15:03:05 Europe/Rome
    - fixed %r and %R to use Time::HiRes when available and set
      time in milliseconds, with added tests (RT85490, thanks Dominique Faure)
