@@ -1,6 +1,6 @@
 package Log::Log4perl::Tiny;
 {
-  $Log::Log4perl::Tiny::VERSION = '1.2.4_02';
+  $Log::Log4perl::Tiny::VERSION = '1.2.4';
 }
 
 # ABSTRACT: mimic Log::Log4perl in one single module
@@ -481,8 +481,11 @@ BEGIN {
 
 1;                  # Magic true value required at end of module
 
+__END__
 
 =pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -490,7 +493,7 @@ Log::Log4perl::Tiny - mimic Log::Log4perl in one single module
 
 =head1 VERSION
 
-version 1.2.4_02
+version 1.2.4
 
 =head1 SYNOPSIS
 
@@ -1201,7 +1204,3 @@ but without any warranty; without even the implied warranty of
 merchantability or fitness for a particular purpose.
 
 =cut
-
-
-__END__
-
