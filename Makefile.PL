@@ -21,7 +21,7 @@ my %WriteMakefileArgs = (
   "NAME" => "Log::Log4perl::Tiny",
   "PREREQ_PM" => {},
   "TEST_REQUIRES" => {},
-  "VERSION" => "1.2.4",
+  "VERSION" => "1.2.5_01",
   "test" => {
     "TESTS" => "t/*.t"
   }

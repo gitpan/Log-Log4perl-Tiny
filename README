@@ -2,7 +2,7 @@ NAME
     Log::Log4perl::Tiny - mimic Log::Log4perl in one single module
 
 VERSION
-    version 1.2.4
+    version 1.2.5_01
 
 SYNOPSIS
        use Log::Log4perl::Tiny qw( :easy );

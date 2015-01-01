@@ -1,6 +1,6 @@
 package Log::Log4perl::Tiny;
 {
-  $Log::Log4perl::Tiny::VERSION = '1.2.4';
+  $Log::Log4perl::Tiny::VERSION = '1.2.5_01';
 }
 
 # ABSTRACT: mimic Log::Log4perl in one single module
@@ -493,7 +493,7 @@ Log::Log4perl::Tiny - mimic Log::Log4perl in one single module
 
 =head1 VERSION
 
-version 1.2.4
+version 1.2.5_01
 
 =head1 SYNOPSIS
 
